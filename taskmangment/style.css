@@ -1,0 +1,27 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    background-image:url('images/istockphoto-1335717953-612x612.jpg');
+    background-size: cover;
+}
+.header {
+    width: 100%;
+    padding: 10px 10px;
+
+}
+.heading{
+    color: #ffff;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 600;
+}
+.tabs {
+    color: #ffff;
+    font-size: 15px;
+    font-weight: 600;    
+}
+
+.list-items a:hover{
+    color: black; !important;
+    border-radius: 30px;
+    background-color: white !important;   
+}
