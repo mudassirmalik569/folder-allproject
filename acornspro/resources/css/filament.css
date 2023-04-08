@@ -1,0 +1,41 @@
+@import '../../vendor/filament/filament/resources/css/app.css';
+
+@media print {
+    .filament-main {
+        padding: 0;
+    }
+
+    .filament-tables-link-action,
+    .filament-main-topbar,
+    .filament-sidebar,
+    .filament-tables-container>div:first-of-type,
+    .total-column,
+    head,
+    style,
+    script,
+    svg,
+    thead {
+        display: none;
+    }
+
+    .filament-tables-checkbox-cell {
+        visibility: hidden;
+    }
+
+    .bg-gray-100,
+    .bg-gray-50,
+    .text-gray-900,
+    body {
+        color: #000;
+        background-color: #fff;
+    }
+
+    .shadow-sm {
+        box-shadow: none;
+    }
+
+    * {
+        border-style: none;
+    }
+    
+}
