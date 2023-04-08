@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Calendar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        #calendar {
+            display: flex;
+            flex-wrap: wrap;
+            /* max-width: 800px; */
+            margin: 0 auto;
+            /* background-color: #f8f8f8; */
+            padding: 20px;
+        }
+        .calendar-cell {
+            border: 1px solid black; /* Set a 1px black border around each calendar cell */
+             padding: 10px; /* Add some padding to make the cell content easier to read */
+        }
+
+        .calendar-row {
+            flex-basis: 25%;
+            margin-bottom: 20px;
+            
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #fff;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            width: 80%;
+            margin-left: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            padding: 5px;
+            
+  border: 1px solid black; /* Set a 1px black border around each calendar cell */
+  padding: 10px; /* Add some padding to make the cell content easier to read */
+
+        }
+
+        thead th {
+            padding: 10px;
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        tbody td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        tbody td.selected {
+            background-color: #6ab04c;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        caption {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .group {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .remain-date {
+            background-color: yellow;
+
+        }
+
+        /* remain date hover */
+        .range:hover {
+            background-color: #f5f5f5;
+        }
+
+
+        /* .calendar-row table tbody td.range {
+            background-color: orange;
+        } */
+
+        .calendar-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1em;
+            
+        }
+
+        .calendar-row table {
+            width: calc(25% - 1em);
+            margin-right: 1em;
+        }
+
+        /* td:hover {
+            background-color: #f5f5f5;
+        } */
+
+        .past-date {
+            background-image: url('https://img.icons8.com/ios/50/null/multiply.png');
+            background-repeat: no-repeat;
+            background-size: 16px;
+            background-position: center;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="calendar"></div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const $calendar = $('#calendar');
+            let startDate = null;
+            let endDate = null;
+
+            // Create calendar
+            for (let i = 0; i < 12; i +=4 ) {
+                const $row = $('<div>').addClass('calendar-row').appendTo($calendar);
+
+                for (let j = 0; j <4 ; j++) {
+                    const month = i + j;
+                    const $table = $('<table>').appendTo($row);
+
+                    $('<thead>').append(
+                        $('<tr>').append(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => $('<th>').text(day)))
+                    ).appendTo($table);
+
+                    const $tbody = $('<tbody>').appendTo($table);
+
+                    function fillDates(year, month) {
+                        $tbody.empty();
+                        const firstDay = new Date(year, month, 1).getDay();
+                        const lastDate = new Date(year, month + 1, 0).getDate();
+
+                        let date = 1;
+                        for (let row = 0; row < 6; row++) {
+                            const $tr = $('<tr>').appendTo($tbody);
+
+                            for (let col = 0; col < 7; col++) {
+                                const $td = $('<td>').appendTo($tr);
+
+                                if (row === 0 && col < firstDay || date > lastDate) {
+                                    $td.text('');
+                                } else {
+                                    const cellDate = new Date(year, month, date);
+                                    const isCurrentMonth = year === currentYear && month === currentDate.getMonth();
+                                    const isPastDate = cellDate < currentDate;
+                                    const isSelected = startDate && endDate && cellDate >= startDate && cellDate <= endDate;
+                                    const isStartDate = startDate && cellDate.getTime() === startDate.getTime();
+                                    const isEndDate = endDate && cellDate.getTime() === endDate.getTime();
+                                    const isCurrentDate = cellDate.getTime() === currentDate.getTime();
+                                    const isRamainDate = cellDate.getTime() > currentDate.getTime();
+                                    const isHoverDate = startDate && cellDate.getTime() > startDate.getTime() && cellDate.getTime() < endDate.getTime();
+                                    const isSelectedMonth = startDate && endDate && cellDate >= startDate && cellDate <= endDate;
+                                    var fullMonthName = new Date(currentYear, month).toLocaleString('default', { month: 'long' });
+
+                                    $td.text(date);
+
+                                    if (isCurrentMonth && !isPastDate && !isSelected) {
+                                        $td.addClass('current-month');
+                                    }
+
+                                    if (isSelected) {
+                                        $td.addClass('selected');
+                                    }
+
+                                    if (isStartDate) {
+                                        $td.addClass('start-date');
+                                    }
+
+                                    if (isEndDate) {
+                                        $td.addClass('end-date');
+                                    }
+                                    if (isPastDate) {
+                                        $td.addClass('past-date');
+                                    }
+                                    if (isRamainDate) {
+                                        $td.addClass('remain-date');
+                                    }
+                                    if (isHoverDate) {
+                                        $td.addClass('range');
+                                    }
+
+
+                                    date++;
+                                }
+                            }
+                        }
+                    }
+
+                    fillDates(currentYear, month);
+
+                    $('<thead>').text(`${new Date(currentYear, month).toLocaleString('default', { month: 'long' })}`).prependTo($table);
+
+                    $table.on('click', 'td', function () {
+                        const $cell = $(this);
+                        const cellText = $cell.text();
+
+                        // Check if the clicked cell is empty or already selected
+                        if (!cellText || $cell.hasClass('selected')) {
+                            return;
+                        }
+
+                        // If start date is not selected yet, set it as the clicked cell
+                        if (!startDate) {
+                            startDate = new Date(currentYear, month, cellText);
+                            $cell.addClass('selected');
+                        }
+                        // If end date is not selected yet, set it as the clicked cell and show popup with selected dates
+                        else if (!endDate) {
+                            const isSameMonth = month === startDate.getMonth();
+                            if (isSameMonth) {
+                                endDate = new Date(currentYear, month, cellText);
+                            } else {
+                                // not able to choose the date from another month
+                                return;
+                            }
+
+
+
+                            $cell.addClass('selected');
+                            const startMs = startDate.getTime();
+                            const endMs = endDate.getTime();
+                            $table.find('td').each(function () {
+                                const cellMs = new Date(currentYear, month, $(this).text()).getTime();
+                                if (cellMs >= startMs && cellMs <= endMs && !$(this).hasClass('selected')) {
+                                    $(this).addClass('selected');
+                                }
+                                // IF START DATE IS WE NOT ABLE TO CHOSE THE DATE BEFORE THE START DATE
+                                if (startDate > endDate) {
+                                    // not able to choose the date before the start date
+                                    endDate = null;
+                                    $table.find('td').each(function () {
+                                        const cellMs = new Date(currentYear, month, $(this).text()).getTime();
+                                        if (cellMs < startMs && $(this).hasClass('selected')) {
+                                            $(this).removeClass('selected');
+                                        }
+                                    });
+                                    // not able to open the modal
+                                    $popup = $('#exampleModal').modal('hide');
+                                }
+                                // alert('End date cannot be before start date.');
+                            });
+                            // Show popup with selected dates
+                            const $popup = $('#exampleModal').modal('show');
+                        }
+                    });
+                }
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
